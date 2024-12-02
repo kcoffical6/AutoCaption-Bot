@@ -4,22 +4,29 @@
 
 import pyrogram, os, asyncio
 
-try: app_id = int(os.environ.get("app_id", "20389440"))
-except Exception as app_id: print(f"⚠️ App ID Invalid {app_id}")
-try: api_hash = os.environ.get("api_hash", "a1a06a18eb9153e9dbd447cfd5da2457")
-except Exception as api_id: print(f"⚠️ Api Hash Invalid {api_hash}")
-try: bot_token = os.environ.get("bot_token", "6564513574:AAH3Y97iqQjSlV5vKKZdGDUohlhpA-LeSbw")
-except Exception as bot_token: print(f"⚠️ Bot Token Invalid {bot_token}")
-try: custom_caption = os.environ.get(
-    "custom_caption",
-    "<b>{file_name}</b>"  # Default caption format with bold tags
-)
-except Exception as e:
-    custom_caption = "<b>{file_name}</b>"
-    print(f"⚠️ Custom Caption Invalid: {e}")
+try:
+    app_id = int(os.environ.get("app_id", "20389440"))
+except Exception as app_id:
+    print(f"⚠️ App ID Invalid {app_id}")
+
+try:
+    api_hash = os.environ.get("api_hash", "a1a06a18eb9153e9dbd447cfd5da2457")
+except Exception as api_hash:
+    print(f"⚠️ Api Hash Invalid {api_hash}")
+
+try:
+    bot_token = os.environ.get("bot_token", "6564513574:AAH3Y97iqQjSlV5vKKZdGDUohlhpA-LeSbw")
+except Exception as bot_token:
+    print(f"⚠️ Bot Token Invalid {bot_token}")
+
+try:
+    custom_caption = os.environ.get("custom_caption", "<b>{file_name}</b>")
+except Exception as custom_caption:
+    print(f"⚠️ Custom Caption Invalid {custom_caption}")
 
 AutoCaptionBotV1 = pyrogram.Client(
-    name="AutoCaptionBotV1", api_id=app_id, api_hash=api_hash, bot_token=bot_token)
+    name="AutoCaptionBotV1", api_id=app_id, api_hash=api_hash, bot_token=bot_token
+)
 
 start_message = """
 <b>👋Hello {}</b>
@@ -41,41 +48,56 @@ def start_command(bot, update):
         start_message.format(update.from_user.mention),
         reply_markup=start_buttons(bot, update),
         parse_mode=pyrogram.enums.ParseMode.HTML,
-        disable_web_page_preview=True,
+        disable_web_page_preview=True
     )
 
 @AutoCaptionBotV1.on_callback_query(pyrogram.filters.regex("start"))
-def strat_callback(bot, update):
+def start_callback(bot, update):
     update.message.edit(
         start_message.format(update.from_user.mention),
         reply_markup=start_buttons(bot, update.message),
         parse_mode=pyrogram.enums.ParseMode.HTML,
-        disable_web_page_preview=True,
+        disable_web_page_preview=True
     )
 
 @AutoCaptionBotV1.on_callback_query(pyrogram.filters.regex("about"))
-def about_callback(bot, update): 
+def about_callback(bot, update):
     bot = bot.get_me()
     update.message.edit(
         about_message.format(version=pyrogram.__version__, username=bot.mention),
         reply_markup=about_buttons(bot, update.message),
         parse_mode=pyrogram.enums.ParseMode.HTML,
-        disable_web_page_preview=True,
+        disable_web_page_preview=True
     )
 
 @AutoCaptionBotV1.on_message(pyrogram.filters.channel)
 def edit_caption(bot, update: pyrogram.types.Message):
     motech, _ = get_file_details(update)
+
     try:
-        # Format the filename: remove commas, replace underscores with dots, and change 'Tamil' to 'Kannada'
+        # Extract caption text
+        caption_text = update.caption or ""
+
+        # Extract prefix text before ':' and validate it
+        prefix = ""
+        if ":" in caption_text:
+            extracted_text = caption_text.split(":", 1)[0].strip()
+            if extracted_text.lower() != "filename":
+                prefix = extracted_text.replace("_", ".").replace(",", "").replace("Tamil", "Kannada") + "."
+
+        # Format the file name: remove commas, replace underscores with dots, and replace "Tamil" with "Kannada"
         formatted_file_name = motech.file_name.replace(",", "").replace("_", ".").replace("Tamil", "Kannada")
-        
+
+        # Prepend the extracted text (if any) to the file name
+        if prefix:
+            formatted_file_name = prefix + formatted_file_name
+
         try:
-            # Use the formatted filename in the custom caption with HTML bold tags
-            update.edit(custom_caption.format(file_name=formatted_file_name))
+            # Apply the custom caption with HTML bold formatting
+            update.edit(custom_caption.format(file_name=f"<b>{formatted_file_name}</b>"))
         except pyrogram.errors.FloodWait as FloodWait:
             asyncio.sleep(FloodWait.value)
-            update.edit(custom_caption.format(file_name=formatted_file_name))
+            update.edit(custom_caption.format(file_name=f"<b>{formatted_file_name}</b>"))
     except pyrogram.errors.MessageNotModified:
         pass
 
@@ -105,11 +127,8 @@ def start_buttons(bot, update):
     buttons = [[
         pyrogram.types.InlineKeyboardButton("Updates", url="t.me/VJ_Botz"),
         pyrogram.types.InlineKeyboardButton("About 🤠", callback_data="about")
-    ],[
-        pyrogram.types.InlineKeyboardButton(
-            "➕️ Add To Your Channel ➕️", 
-            url=f"http://t.me/{bot.username}?startchannel=true"
-        )
+    ], [
+        pyrogram.types.InlineKeyboardButton("➕️ Add To Your Channel ➕️", url=f"http://t.me/{bot.username}?startchannel=true")
     ]]
     return pyrogram.types.InlineKeyboardMarkup(buttons)
 
