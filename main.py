@@ -4,33 +4,23 @@
 
 import pyrogram, os, asyncio
 
-# Get environment variables
-try:
-    app_id = int(os.environ.get("app_id", "20389440"))
-except Exception as app_id: 
-    print(f"⚠️ App ID Invalid {app_id}")
-
-try:
-    api_hash = os.environ.get("api_hash", "a1a06a18eb9153e9dbd447cfd5da2457")
-except Exception as api_id: 
-    print(f"⚠️ Api Hash Invalid {api_hash}")
-
-try:
-    bot_token = os.environ.get("bot_token", "6564513574:AAH3Y97iqQjSlV5vKKZdGDUohlhpA-LeSbw")
-except Exception as bot_token: 
-    print(f"⚠️ Bot Token Invalid {bot_token}")
-
-try:
-    custom_caption = os.environ.get("custom_caption", "<b>{file_name}</b>")  # Default caption format
+try: app_id = int(os.environ.get("app_id", "20389440"))
+except Exception as app_id: print(f"⚠️ App ID Invalid {app_id}")
+try: api_hash = os.environ.get("api_hash", "a1a06a18eb9153e9dbd447cfd5da2457")
+except Exception as api_id: print(f"⚠️ Api Hash Invalid {api_hash}")
+try: bot_token = os.environ.get("bot_token", "6564513574:AAH3Y97iqQjSlV5vKKZdGDUohlhpA-LeSbw")
+except Exception as bot_token: print(f"⚠️ Bot Token Invalid {bot_token}")
+try: custom_caption = os.environ.get(
+    "custom_caption",
+    "<b>{file_name}</b>"  # Default caption format with bold tags
+)
 except Exception as e:
     custom_caption = "<b>{file_name}</b>"
     print(f"⚠️ Custom Caption Invalid: {e}")
 
-# Initialize the bot client
 AutoCaptionBotV1 = pyrogram.Client(
     name="AutoCaptionBotV1", api_id=app_id, api_hash=api_hash, bot_token=bot_token)
 
-# Start and About messages
 start_message = """
 <b>👋Hello {}</b>
 <b>I am an AutoCaption bot</b>
@@ -128,10 +118,6 @@ def about_buttons(bot, update):
         pyrogram.types.InlineKeyboardButton("🏠 Back To Home 🏠", callback_data="start")
     ]]
     return pyrogram.types.InlineKeyboardMarkup(buttons)
-
-# Ensure no port is required for the bot (Render, Docker)
-port = os.getenv("PORT", "5000")  # Set default port if Render still expects it
-print(f"Bot is running on port {port}, but it's a background worker and doesn't need it.")
 
 print("Telegram AutoCaption V1 Bot Start")
 print("Bot Created By https://t.me/VJ_Botz")
