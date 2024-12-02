@@ -12,10 +12,10 @@ try: bot_token = os.environ.get("bot_token", "6564513574:AAH3Y97iqQjSlV5vKKZdGDU
 except Exception as bot_token: print(f"⚠️ Bot Token Invalid {bot_token}")
 try: custom_caption = os.environ.get(
     "custom_caption",
-    "{file_name}"  # Default caption format
+    "<b>{file_name}</b>"  # Default caption format with bold tags
 )
 except Exception as e:
-    custom_caption = "{file_name}"
+    custom_caption = "<b>{file_name}</b>"
     print(f"⚠️ Custom Caption Invalid: {e}")
 
 AutoCaptionBotV1 = pyrogram.Client(
@@ -71,7 +71,7 @@ def edit_caption(bot, update: pyrogram.types.Message):
         formatted_file_name = motech.file_name.replace(",", "").replace("_", ".")
         
         try:
-            # Use the formatted filename in the custom caption
+            # Use the formatted filename in the custom caption with HTML bold tags
             update.edit(custom_caption.format(file_name=formatted_file_name))
         except pyrogram.errors.FloodWait as FloodWait:
             asyncio.sleep(FloodWait.value)
