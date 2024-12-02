@@ -67,8 +67,8 @@ def about_callback(bot, update):
 def edit_caption(bot, update: pyrogram.types.Message):
     motech, _ = get_file_details(update)
     try:
-        # Format the filename: remove commas and replace underscores with dots
-        formatted_file_name = motech.file_name.replace(",", "").replace("_", ".")
+        # Format the filename: remove commas, replace underscores with dots, and change 'Tamil' to 'Kannada'
+        formatted_file_name = motech.file_name.replace(",", "").replace("_", ".").replace("Tamil", "Kannada")
         
         try:
             # Use the formatted filename in the custom caption with HTML bold tags
